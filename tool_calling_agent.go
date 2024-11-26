@@ -22,44 +22,50 @@ func toolCallingAgent(setup Setup, prompt string, previousMessages []openai.Chat
 	messages.Value = append(messages.Value, previousMessages...)
 	messages.Value = append(messages.Value, openai.UserMessage(prompt))
 	params := openai.ChatCompletionNewParams{
-		Messages: messages,
-		Tools: openai.F([]openai.ChatCompletionToolParam{
-			{
-				Type: openai.F(openai.ChatCompletionToolTypeFunction),
-				Function: openai.F(openai.FunctionDefinitionParam{
-					Name:        openai.String("get_courses"),
-					Description: openai.String("get information about courses using professor names, course names, course locatins, or other course-related information"),
-					Parameters: openai.F(openai.FunctionParameters{
-						"type": "object",
-						"properties": map[string]interface{}{
-							"prompt": map[string]string{
-								"type": "string",
-							},
-						},
-						"required": []string{"prompt"},
-					}),
-				}),
-			},
-			{
-				Type: openai.F(openai.ChatCompletionToolTypeFunction),
-				Function: openai.F(openai.FunctionDefinitionParam{
-					Name:        openai.String("get_rate_my_professor_data"),
-					Description: openai.String("get professor information from Rate My Professor for professors using their names"),
-					Parameters: openai.F(openai.FunctionParameters{
-						"type": "object",
-						"properties": map[string]interface{}{
-							"names": map[string]interface{}{
-								"type":  "array",
-								"items": map[string]string{"type": "string"},
-							},
-						},
-						"required": []string{"names"},
-					}),
-				}),
-			},
+		Messages: openai.F([]openai.ChatCompletionMessageParamUnion{
+			openai.SystemMessage(systemPrompt),
 		}),
-		Model: openai.F(openai.ChatModelGPT4oMini),
 	}
+
+	params.Messages.Value = append(params.Messages.Value, previousMessages...)
+
+	params.Messages.Value = append(params.Messages.Value, openai.UserMessage(prompt))
+
+	params.Tools = openai.F([]openai.ChatCompletionToolParam{
+		{
+			Type: openai.F(openai.ChatCompletionToolTypeFunction),
+			Function: openai.F(openai.FunctionDefinitionParam{
+				Name:        openai.String("get_courses"),
+				Description: openai.String("get course information"),
+				Parameters: openai.F(openai.FunctionParameters{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"prompt": map[string]string{
+							"type": "string",
+						},
+					},
+					"required": []string{"prompt"},
+				}),
+			}),
+		},
+		{
+			Type: openai.F(openai.ChatCompletionToolTypeFunction),
+			Function: openai.F(openai.FunctionDefinitionParam{
+				Name:        openai.String("get_rate_my_professor_data"),
+				Description: openai.String("get professor information from Rate My Professor"),
+				Parameters: openai.F(openai.FunctionParameters{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"name": map[string]string{
+							"type": "string",
+						},
+					},
+					"required": []string{"name"},
+				}),
+			}),
+		},
+	})
+	params.Model = openai.F(openai.ChatModelGPT4oMini)
 
 	completion, err := setup.openAIClient.client.Chat.Completions.New(context.TODO(), params)
 	if err != nil {
