@@ -106,7 +106,7 @@ func Test_toolCallingAgent(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := toolCallingAgent(setup, tt.prompt)
+			got, _ := toolCallingAgent(setup, tt.prompt, nil)
 			similar, reason := isSimilar(setup, got, tt.want)
 			if !similar {
 				t.Errorf("toolCallingAgent() = \n\n%v\n\nwant:\n\n%v\n\nreason:\n\n%v", got, tt.want, reason)

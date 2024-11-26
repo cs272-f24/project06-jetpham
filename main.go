@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 	"strings"
+
+	"github.com/openai/openai-go"
 )
 
 func main() {
@@ -23,7 +25,7 @@ func main() {
 		return
 	}
 	fmt.Print("\033[H\033[2J")
-	fmt.Println("Ask a question about courses or type 'exit' to quit.")
+	fmt.Println("Ask a question about courses or type 'exit' to quit, or 'clear' to clear the screen.")
 	exampleQuestions := []string{
 		"What courses is Phil Peterson teaching in Fall 2024?",
 		"Which philosophy courses are offered this semester?",
@@ -37,14 +39,20 @@ func main() {
 		fmt.Println("-", question)
 	}
 	reader := bufio.NewReader(os.Stdin)
+	previousMessages := []openai.ChatCompletionMessageParamUnion{}
 	for {
 		fmt.Print("Enter prompt: ")
 		prompt, _ := reader.ReadString('\n')
 		prompt = strings.TrimSpace(prompt)
 		if prompt == "exit" {
 			break
+		} else if prompt == "clear" {
+			fmt.Print("\033[H\033[2J")
+			previousMessages = []openai.ChatCompletionMessageParamUnion{}
+			continue
 		}
-		output := toolCallingAgent(setup, prompt)
+		var output string
+		output, previousMessages = toolCallingAgent(setup, prompt, previousMessages)
 		fmt.Println(output)
 	}
 }

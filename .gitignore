@@ -4,3 +4,4 @@ chromadb/chroma.sqlite3
 testlogfile
 __debug*
 action output.json
+app.log
