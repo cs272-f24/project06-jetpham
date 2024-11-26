@@ -27,6 +27,10 @@ jobs:
     - name: Run Docker Compose
       run: docker compose up -d
     
+    - name: Install Python dependencies
+      run: |
+        python3 -m pip install -r requirements.txt
+
     - name: Start Flask App
       run: |
         nohup python3 app.py &
