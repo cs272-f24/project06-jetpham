@@ -114,9 +114,9 @@ func toolCallingAgent(setup Setup, prompt string) string {
 			}
 			professorInfoJSON, _ := json.Marshal(professorInfo)
 			params.Messages.Value = append(params.Messages.Value, openai.ToolMessage(toolCall.ID, string(professorInfoJSON)))
-	}
+		}
 
-	params.Messages.Value = append(params.Messages.Value, openai.SystemMessage(`
+		params.Messages.Value = append(params.Messages.Value, openai.SystemMessage(`
 		Task: Generate an answer that corresponds to the provided question, mimicking the question's structure and format. Ensure the response is succinct, directly relevant to the query, and excludes any extraneous details.
 
 		Reponce Format:
@@ -133,12 +133,15 @@ func toolCallingAgent(setup Setup, prompt string) string {
 		- List course details in a numbered format for clarity.
 		- Ensure responce directory addresses the question
 		`))
-	params.Messages.Value = append(params.Messages.Value, openai.UserMessage(fmt.Sprintf("Prompt: %s", prompt)))
-	completion, err = setup.openAIClient.client.Chat.Completions.New(context.TODO(), params)
-	if err != nil {
-		log.Printf("Error creating chat completion: %v", err)
-		return ""
-	}
+		params.Messages.Value = append(params.Messages.Value, openai.UserMessage(fmt.Sprintf("Prompt: %s", prompt)))
+		completion, err = setup.openAIClient.client.Chat.Completions.New(context.TODO(), params)
+		if err != nil {
+			log.Printf("Error creating chat completion: %v", err)
+			return ""
+		}
 
+		return completion.Choices[0].Message.Content
+	}
+	// If there was no tool calls, return the completion this basically only happens if it calls a tool that doesn't exist
 	return completion.Choices[0].Message.Content
 }
