@@ -10,9 +10,9 @@ else
 fi
 
 # Check if the Docker container is up
-if ! docker-compose ps | grep 'Up'; then
+if ! docker compose ps | grep 'Up'; then
   echo "Starting Docker container..."
-  docker-compose up -d
+  docker compose up -d
 else
   echo "Docker container is already running."
 fi

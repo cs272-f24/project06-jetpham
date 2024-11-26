@@ -41,3 +41,15 @@ func getRateMyProfessorData(name string) (ProfessorInfo, error) {
 
 	return professorInfo, nil
 }
+
+func getManyProfessorsData(names []string) ([]ProfessorInfo, error) {
+	var professors []ProfessorInfo
+	for _, name := range names {
+		professor, err := getRateMyProfessorData(name)
+		if err != nil {
+			return nil, err
+		}
+		professors = append(professors, professor)
+	}
+	return professors, nil
+}
